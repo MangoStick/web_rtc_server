@@ -16,7 +16,7 @@ async function server(){
             console.log('join ' + x.msg)
             // console.log('join ' + uuidv4())
             socket.join(x.msg);
-            socket.to(x.msg).emit('joined');
+            socket.to(x.msg).emit('joined'); 
 
             socket.on('disconnect', () => {
                 console.log('disconnect')
