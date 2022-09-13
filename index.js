@@ -80,28 +80,24 @@ io.on('connection', (socket) => {
         socket.to(x.room).emit('joined'); 
 
         socket.on('disconnect', () => {
-            console.log('disconnect')
-            console.log('disconnect ' + x.room)
-            socket.to(x.room).emit('disconnected', x.id);
+            console.log(x.userId + 'disconnect ' + x.room)
+            socket.to(x.room).emit('disconnected', x.userId);
             // var x = JSON.parse(data)
             // socket.to(x.msg).broadcast.emit('user-disconnected', x.msg)
         })
 
     });
     socket.on('offer', (offer) => {
-        // console.log('offer ' + roomName)
         var x = JSON.parse(offer)
         console.log('offer ' + offer)
         socket.to(x.room).emit('offer', offer);
     });
     socket.on('answer', (answer) => {
-        // console.log('answer ' + roomName)
         var x = JSON.parse(answer)
         console.log('answer ' + answer)
         socket.to(x.room).emit('answer', answer);
     });
     socket.on('ice', (ice) => {
-        // console.log('ice ' + roomName)
         var x = JSON.parse(ice)
         console.log('ice ' + ice)
         socket.to(x.room).emit('ice', ice);
