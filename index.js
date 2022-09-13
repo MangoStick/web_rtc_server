@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
         socket.on('disconnect', () => {
             console.log('disconnect')
             console.log('disconnect ' + x.room)
-            socket.to(x.room).emit('disconnected');
+            socket.to(x.room).emit('disconnected', x.id);
             // var x = JSON.parse(data)
             // socket.to(x.msg).broadcast.emit('user-disconnected', x.msg)
         })
