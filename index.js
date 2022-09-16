@@ -68,26 +68,32 @@ io.on('connection', (socket) => {
 
     socket.on('join', (data) =>{
         var join_data = JSON.parse(data)
+        // console.log('join ' + JSON.parse(join_data))
+        console.log('join ' + data)
         socket.join(join_data.room);
-        socket.to(join_data.room).emit('joined'); 
+        socket.to(join_data.room).emit('joined', join_data.userName); 
 
         socket.on('disconnect', () => {
-            socket.to(join_data.room).emit('disconnected', join_data.userId);
+            console.log('disconnect ' + data)
+            socket.to(join_data.room).emit('disconnected', join_data.userName);
         })
     });
 
     socket.on('offer', (offer) => {
         var offer_data = JSON.parse(offer)
+        console.log('offer ' + offer_data.userName)  
         socket.to(offer_data.room).emit('offer', offer);
     });
 
     socket.on('answer', (answer) => {
         var answer_data = JSON.parse(answer)
+        console.log('answer ' + answer_data.userName)
         socket.to(answer_data.room).emit('answer', answer);
     });
 
     socket.on('ice', (ice) => {
         var ice_data = JSON.parse(ice)
+        console.log('ice ' + ice_data.userName)
         socket.to(ice_data.room).emit('ice', ice);
     });
 
