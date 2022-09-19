@@ -60,21 +60,94 @@ const { Server } = require('socket.io');
 const io = new Server(server, {transports: ['websocket']});
 const PORT = process.env.PORT || 3000;
 
+const { v4: uuidv4 } = require("uuid");
+
 app.get('/', (req, res) => {
     res.write(`<h1>Socket IO Start on Port : ${PORT}</h1>`);
 });
 
+
+const _login_user = [];
+
 io.on('connection', (socket) => {
+
+    socket.on('login', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('login ' + data)
+        join_data['socketId'] = socket.id
+        _login_user.push(join_data)
+
+        socket.join('loginRoom')
+        socket.to('loginRoom').emit('loggedin', join_data); 
+
+        socket.on('disconnect', () => {    
+            console.log('login disconnect ' + data)
+            const indexOfObject = _login_user.findIndex(object => {
+                return object.userId === join_data['userId'];
+            });
+            _login_user.splice(indexOfObject, 1);
+            socket.to('loginRoom').emit('loggedout', join_data);
+            socket.to('loginRoom').emit('disconnected', join_data);
+        })
+    });
+
+
+    socket.on('inituser', (data) => {
+        var join_data = JSON.parse(data)
+        console.log('inituser ' + data)
+        var call_obj = _login_user.filter(x => x['userId'] != join_data['userId'])
+        socket.to('loginRoom').emit('inituserstate', call_obj); 
+    })
+
+
+    socket.on('call', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('call ' + data)
+        const _room = uuidv4()
+        join_data['room'] = _room
+        socket.to(join_data['socketId']).emit('calling', join_data); 
+    });
+
+    socket.on('denide', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('denide ' + data)
+        socket.to(join_data['socketId']).emit('denided', join_data); 
+    });
+
+    socket.on('accept', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('accept ' + data)
+        var caller_obj = _login_user.filter(x => x['userId'] == join_data['caller'])
+        console.log('send accept to ' + caller_obj[0]['socketId'])
+        socket.to(caller_obj[0]['socketId']).emit('accepted', join_data); 
+    });
+
+    socket.on('denideaccept', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('accept ' + data)
+        var caller_obj = _login_user.filter(x => x['userId'] == join_data['caller'])
+        console.log('send accept to ' + caller_obj[0]['socketId'])
+        socket.to(caller_obj[0]['socketId']).emit('denideaccepted', join_data); 
+    });
+
+
+    socket.on('leaveroom', (data) =>{
+        var join_data = JSON.parse(data)
+        console.log('leaveroom ' + data)
+        console.log(socket.rooms)
+        socket.leave(socket.rooms[0])
+        socket.to(socket.rooms[0]).emit('disconnected', join_data)
+    });
+
 
     socket.on('join', (data) =>{
         var join_data = JSON.parse(data)
-        // console.log('join ' + JSON.parse(join_data))
         console.log('join ' + data)
         socket.join(join_data.room);
         socket.to(join_data.room).emit('joined', join_data.userName); 
 
         socket.on('disconnect', () => {
-            console.log('disconnect ' + data)
+            console.log('join disconnect ' + data)
             socket.to(join_data.room).emit('disconnected', join_data.userName);
         })
     });
