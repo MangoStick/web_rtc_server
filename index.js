@@ -86,8 +86,8 @@ io.on('connection', (socket) => {
                 return object.userId === join_data['userId'];
             });
             _login_user.splice(indexOfObject, 1);
-            socket.to('loginRoom').emit('loggedout', join_data);
-            socket.to('loginRoom').emit('disconnected', join_data);
+            socket.to('loginRoom').emit('userout', join_data);
+            // socket.to('loginRoom').emit('disconnected', join_data);
         })
     });
 
@@ -134,9 +134,8 @@ io.on('connection', (socket) => {
     socket.on('leaveroom', (data) =>{
         var join_data = JSON.parse(data)
         console.log('leaveroom ' + data)
-        console.log(socket.rooms)
-        socket.leave(socket.rooms[0])
-        socket.to(socket.rooms[0]).emit('disconnected', join_data)
+        socket.leave(join_data.room)
+        socket.to(join_data.room).emit('disconnectedroom', join_data)
     });
 
 
@@ -148,7 +147,7 @@ io.on('connection', (socket) => {
 
         socket.on('disconnect', () => {
             console.log('join disconnect ' + data)
-            socket.to(join_data.room).emit('disconnected', join_data.userName);
+            socket.to(join_data.room).emit('disconnectedroom', join_data.userName);
         })
     });
 
